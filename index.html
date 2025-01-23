@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Note Calculator</title>
+  <style>
+    /* General Styles */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 450px;
+      margin: 30px auto;
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #4CAF50;
+      font-size: 24px;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    label {
+      font-size: 15px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      display: block;
+    }
+    input {
+      padding: 8px;
+      font-size: 14px;
+      margin-right: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+      transition: border 0.3s;
+    }
+    input[type="number"] {
+      width: 100%;
+    }
+    input.max {
+      width: 70px;
+    }
+    input:focus {
+      outline: none;
+      border-color: #4CAF50;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      font-size: 16px;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .checkbox-group {
+      margin-bottom: 20px;
+    }
+    .checkbox-group p {
+      font-size: 16px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    .checkbox-group label {
+      font-size: 15px;
+      margin: 8px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .result {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      text-align: left;
+      font-size: 16px;
+      line-height: 1.6;
+      border: 1px solid #ddd;
+    }
+    .result p {
+      margin: 8px 0;
+    }
+    .highlight {
+      font-weight: bold;
+      color: #4CAF50;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Cash Calculator</h1>
+    <label for="amount">Enter Amount:</label>
+    <input type="number" id="amount" placeholder="Enter amount in ₹">
+
+    <div class="checkbox-group">
+      <p><strong>Unavailable Notes and Max Limits:</strong></p>
+      <label>
+        <input type="checkbox" value="500" id="note500"> ₹500 
+        <input type="number" class="max" id="max500" placeholder="Max" title="Max ₹500 notes">
+      </label>
+      <label>
+        <input type="checkbox" value="200" id="note200"> ₹200 
+        <input type="number" class="max" id="max200" placeholder="Max" title="Max ₹200 notes">
+      </label>
+      <label>
+        <input type="checkbox" value="100" id="note100"> ₹100 
+        <input type="number" class="max" id="max100" placeholder="Max" title="Max ₹100 notes">
+      </label>
+      <label>
+        <input type="checkbox" value="50" id="note50"> ₹50 
+        <input type="number" class="max" id="max50" placeholder="Max" title="Max ₹50 notes">
+      </label>
+      <label>
+        <input type="checkbox" value="20" id="note20"> ₹20 
+        <input type="number" class="max" id="max20" placeholder="Max" title="Max ₹20 notes">
+      </label>
+      <label>
+        <input type="checkbox" value="10" id="note10"> ₹10 
+        <input type="number" class="max" id="max10" placeholder="Max" title="Max ₹10 notes">
+      </label>
+    </div>
+
+    <button onclick="calculateNotes()">Calculate</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    // "Enter" key par calculation karne ka functionality
+    document.getElementById('amount').addEventListener('keypress', function(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault(); // Form ko submit hone se rokne ke liye
+        calculateNotes(); // Direct result calculate karega
+      }
+    });
+
+    function calculateNotes() {
+      let amountInput = document.getElementById('amount').value;
+      let amount = parseInt(amountInput.split('.')[0]);  // Pehle part ko integer me convert karein
+
+      // Agar amount mein dot ke baad koi value hai to usse subtract karna
+      if (amountInput.includes('.')) {
+        let decimalValue = parseInt(amountInput.split('.')[1]);
+        amount -= decimalValue;  // Amount se decimal value ko subtract karna
+      }
+
+      if (isNaN(amount) || amount <= 0) {
+        document.getElementById('result').innerHTML = "Please enter a valid amount.";
+        return;
+      }
+
+      const unavailableNotes = [];
+      if (document.getElementById('note500').checked) unavailableNotes.push(500);
+      if (document.getElementById('note200').checked) unavailableNotes.push(200);
+      if (document.getElementById('note100').checked) unavailableNotes.push(100);
+      if (document.getElementById('note50').checked) unavailableNotes.push(50);
+      if (document.getElementById('note20').checked) unavailableNotes.push(20);
+      if (document.getElementById('note10').checked) unavailableNotes.push(10);
+
+      const denominations = [
+        { note: 500, max: parseInt(document.getElementById('max500').value) || Infinity },
+        { note: 200, max: parseInt(document.getElementById('max200').value) || Infinity },
+        { note: 100, max: parseInt(document.getElementById('max100').value) || Infinity },
+        { note: 50, max: parseInt(document.getElementById('max50').value) || Infinity },
+        { note: 20, max: parseInt(document.getElementById('max20').value) || Infinity },
+        { note: 10, max: parseInt(document.getElementById('max10').value) || Infinity }
+      ].filter(d => !unavailableNotes.includes(d.note));
+
+      // Function to format numbers with commas
+      function formatNumber(number) {
+        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+
+      let result = `<p><strong>Total Amount: ₹${formatNumber(amount)}</strong></p>`;
+      let totalUsedAmount = 0;
+
+      denominations.forEach(denomination => {
+        if (amount > 0) {
+          let count = Math.min(Math.floor(amount / denomination.note), denomination.max);
+          if (count > 0) {
+            let noteTotal = count * denomination.note;
+            totalUsedAmount += noteTotal;
+            result += `<p>₹${denomination.note} × ${count} = <span class="highlight">₹${formatNumber(noteTotal)}</span></p>`;
+            amount -= noteTotal;
+          }
+        }
+      });
+
+      if (amount > 0) {
+        result += `<p>Remaining amount: <span class="highlight">₹${formatNumber(amount)}</span> (Cannot be distributed with available notes)</p>`;
+      }
+
+      result += `<p><strong>Total Used Amount: <span class="highlight">₹${formatNumber(totalUsedAmount)}</span></strong></p>`;
+      document.getElementById('result').innerHTML = result;
+    }
+  </script>
+</body>
+</html>
